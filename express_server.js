@@ -2,15 +2,27 @@ var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const uuidv4 = require('uuid/v4');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+
 
 
 var urlDatabase = {
     "b2xVn2": "http://www.lighthouselabs.ca",
     "9sm5xK": "http://www.google.com"
 };
+
+app.post("/urls/:id/delete", (req, res) => {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+    urlDatabase[req.params.shortURL] = req.body.longURL
+    res.redirect("/urls");
+});
 
 app.post("/urls", (req, res) => {
     const longUrl = req.body.longURL;
