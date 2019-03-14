@@ -1,27 +1,28 @@
-
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>TinyApp</title>
-</head>
-<body style="font-size:20px; padding:50px;">
-    <!-- Add EJS code here -->
-    <%- include ./partials/_header.ejs %>
-    
-
-    <a href="#">Create a Link</a>
-
-    <h5>My URLs: </h5>
-
-    <% for (let url in urls) { %><li><%= url %> : <%= urls[url] %></li><%} %>
-    <a href="#"></a>
+ <!-- Add EJS code here -->
 
 
 
-
+<%- include ./partials/_header.ejs %>
+<br>
+<a href="/urls/new">Create new URLs</a>
+<h5>My URLs: </h5>
+<ul>
+      <% for (let url in urls) { %>
+      <li style="display:flex; align-items: center" >
+      
+      <%= url %> &rarr; <a href= <%= urls[url] %>><%= urls[url] %> </a>  <!--ask riki about h ref-->
+      <form method="GET" action="/urls/<%= url %>">
+      <button style="margin:5px" type="submit" class="btn btn-primary">Edit</button></form>
+      <form method="POST" action="/urls/<%= url %>/delete"> 
+      <button style="margin:5px" type="submit" class="btn btn-primary">Delete</button></form>
+      
+      
+      </li>
+          <%} %>
+</ul>
+          
 </body>
 </html>
+          
+<!--this is the short URL/key = "url"-->
+<!--this is the long URL/value = "urls[url]"-->
