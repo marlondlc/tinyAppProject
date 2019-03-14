@@ -2,73 +2,91 @@ var express = require("express");
 var app = express();
 var PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require("uuid/v4");
+var cookieParser = require("cookie-parser");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
-
-
+app.use(cookieParser());
 
 var urlDatabase = {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "9sm5xK": "http://www.google.com"
+  b2xVn2: "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
 };
 
 app.post("/urls/:id/delete", (req, res) => {
-    delete urlDatabase[req.params.id];
-    res.redirect("/urls");
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-    urlDatabase[req.params.shortURL] = req.body.longURL
-    res.redirect("/urls");
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+app.post("/login", (req, res) => {
+  res.cookie("user", req.body.username);
+
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {
+  //req.session = null;
+  res.clearCookie("user", req.body.username);
+  res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
-    const longUrl = req.body.longURL;
-    const shortUrl = generateRandomString();
-    urlDatabase[shortUrl] = longUrl
+  const longUrl = req.body.longURL;
+  const shortUrl = generateRandomString();
+  urlDatabase[shortUrl] = longUrl;
 
-    res.redirect(`/urls/${shortUrl}`);
+  res.redirect(`/urls/${shortUrl}`);
 });
 
 app.get("/urls", (req, res) => {
-    let templateVars = { urls: urlDatabase };
-    res.render("urls_index", templateVars);
+  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-    let templateVars = { urls: urlDatabase };
-    res.render("urls_new", templateVars);
+  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-    let templateVars = {
-        shortURL: req.params.shortURL,
-        longURL: urlDatabase[req.params.shortURL]
-    };
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    loggedUser: req.cookies.user
+  };
 
-    res.render("urls_show", templateVars);
+  res.render("urls_show", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  //res.render("url_login");
 });
 
 app.get("/u/:shortURL", (req, res) => {
-    const shortUrl = req.params.shortURL
-    const longURL = urlDatabase[shortUrl]
+  const shortUrl = req.params.shortURL;
+  const longURL = urlDatabase[shortUrl];
 
-    res.redirect(longURL);
+  res.redirect(longURL);
 });
-
 
 app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Example app listening on port ${PORT}!`);
 });
 app.get("/urls.json", (req, res) => {
-    res.json(urlDatabase);
+  res.json(urlDatabase);
 });
 
 function generateRandomString() {
-    return Math.random().toString(36).substring(2, 8);
-};
+  return Math.random()
+    .toString(36)
+    .substring(2, 8);
+}
 
 /*
     function addNewUrl(shortUrl,longUrl) {
