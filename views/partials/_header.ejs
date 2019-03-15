@@ -14,26 +14,22 @@
 
 <% if ( loggedUser )  {%> 
 
-<h5>Welcome,
-<%=loggedUser%> 
-</h5>
+<h5>Logged in as: <%=loggedUser.email%> </h5>
+<div>
 
+</div>
     <form method = "POST" action="/logout">
         <button type="submit" class="btn btn-primary">Log Out</button>
     </form>
-</div>
 <% } else { %>
-<a href="/login">Login</a> |
-<a href="/register">Register</a> 
+  <a href="/login">Login</a> |
+  <a href="/register">Register</a> 
 <% }%>
-
-
 
 
 <body style="font-size:20px; padding:50px;">
 <form action="/login" method="POST">
-    <input type="text" placeholder="Enter username" name="username">
-      <button type="submit" class="btn btn-primary">Sign In</button>
+    
 </form>
     
 
