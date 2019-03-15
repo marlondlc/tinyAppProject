@@ -13,12 +13,15 @@
 </head>
 <h1>TinyApp</h1>
 
-<% if ( loggedUser )  {%> 
+<% if ( loggedUser)  {%> 
 
-<h5>Logged in as: <%=loggedUser.email%> </h5>
-    <form method = "POST" action="/logout">
-        <button type="submit" class="btn btn-primary">Log Out</button>
-    </form>
+<a href="/urls">URLs</a> | <a href="/urls/new">Create new URLs</a> 
+<h6>Logged in as: <%=loggedUser.email%> </h6>
+<form method = "POST" action="/logout">
+<button type="submit" class="btn btn-primary">Log Out</button>
+</form>
+
+
 <% } else { %>
   <a href="/login">Login</a> |
   <a href="/register">Register</a> 
