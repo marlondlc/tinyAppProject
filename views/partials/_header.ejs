@@ -9,15 +9,13 @@
   <link rel="stylesheet"  href="/style.css">
   <title>TinyApp</title>
 
+  
 </head>
 <h1>TinyApp</h1>
 
 <% if ( loggedUser )  {%> 
 
 <h5>Logged in as: <%=loggedUser.email%> </h5>
-<div>
-
-</div>
     <form method = "POST" action="/logout">
         <button type="submit" class="btn btn-primary">Log Out</button>
     </form>

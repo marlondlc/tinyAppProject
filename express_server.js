@@ -1,9 +1,9 @@
-var express = require("express");
-var app = express();
-var PORT = 8080; // default port 8080
+const express = require("express");
+const app = express();
+const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const uuidv4 = require("uuid/v4");
-var cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
@@ -27,8 +27,8 @@ const usersDb = {
   },
   user3RandomID: {
     id: "user3RandomID",
-    email: "marlon@msn.com",
-    password: "123abc"
+    email: "test@test.com",
+    password: "test"
   }
 };
 
@@ -36,28 +36,18 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const passwordForm = req.body.password;
   const emailPasswordEmpty = !email || !passwordForm;
-  const emailUserInDB = emailLookup(email);
-  //   const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-  //   const compSync = bcrypt.compareSync(req.body.password, hashedPassword);
-  let user;
+  const userId = getUserIdByEmail(email);
 
-  //I need to find a user with that email
-
-  //I need to match if this specific user has the correct password
-  for (var userId in usersDb) {
-    if (
-      email === usersDb[userId].email &&
-      passwordForm === usersDb[userId].password
-    ) {
-      user = usersDb[userId];
-    }
+  if (emailPasswordEmpty) {
+    res.status(403).send("Please fill out the required feild");
+  } else if (!userId) {
+    res.status(403).send("wrong credentials!");
+  } else if (usersDb[userId].password === passwordForm) {
+    res.cookie("user_id", userId);
+    res.redirect("/urls");
+  } else {
+    res.status(400).send("wrong credentials!");
   }
-
-  //I need to set the cookie called userid to store that user's id
-
-  res.cookie("userid", user.id);
-
-  res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
@@ -75,18 +65,17 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  //if reference is needed: (below)
   const email = req.body.email;
   const password = req.body.password;
   const emailPasswordEmpty = !password || !email;
 
   if (emailPasswordEmpty) {
     res.status(400).send("please fill out the required field");
-  } else if (emailLookup(email)) {
-    res.status(400).send("User already exist. Please Login!");
+  } else if (getUserIdByEmail(email)) {
+    res.status(400).send("Email already exist. Please Login!");
   } else {
     const userId = createUser(email, password);
-    res.cookie("userid", userId); // this needs to be changed to req.session.user_id = userId
+    res.cookie("user_id", userId); // this needs to be changed to req.session.user_id = userId
     res.redirect("/urls");
   }
 });
@@ -109,7 +98,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.userid };
+  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id };
   res.render("urls_new", templateVars);
 });
 
@@ -170,9 +159,7 @@ const createUser = (email, password) => {
   return user_id;
 };
 
-// - test: createUser("bob@bob.com", "123abc");
-
-const emailLookup = email => {
+const getUserIdByEmail = email => {
   //email(parameter) is coming from req.body.email
   for (const userId in usersDb) {
     if (usersDb[userId].email === email) {
@@ -181,6 +168,7 @@ const emailLookup = email => {
   }
   return false;
 };
+
 /*
 NOTES:
 
