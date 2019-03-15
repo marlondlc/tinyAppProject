@@ -4,15 +4,29 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const uuidv4 = require("uuid/v4");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+const bcrypt = require("bcrypt");
+
+app.use(cookieSession({ name: "session", keys: ["Key1", "Key2"] }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(cookieParser());
 
 var urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+    shortUrl: "b2xVn2",
+    longUrl: "http://www.lighthouselabs.ca",
+    userId: "user3RandomID"
+  },
+  "9sm5xK": {
+    shortUrl: "9sm5xK",
+    longUrl: "http://www.google.com",
+    userId: "user3RandomID"
+  }
 };
+
+// shortUrl: {shortUrl: shortUrl,longUrl: longUrl,userId: userId};
 
 const usersDb = {
   userRandomID: {
@@ -32,11 +46,17 @@ const usersDb = {
   }
 };
 
+app.get("/", (req, res) => {
+  res.redirect("/urls");
+});
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const passwordForm = req.body.password;
   const emailPasswordEmpty = !email || !passwordForm;
   const userId = getUserIdByEmail(email);
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+  const compSync = bcrypt.compareSync(req.body.password, hashedPassword);
 
   if (emailPasswordEmpty) {
     res.status(403).send("Please fill out the required feild");
@@ -51,23 +71,25 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  //req.session = null;
-  res.clearCookie("userid");
+  req.session = null;
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
   const longUrl = req.body.longURL;
   const shortUrl = generateRandomString();
-  urlDatabase[shortUrl] = longUrl;
-
-  res.redirect(`/urls/${shortUrl}`);
+  //urlDatabase[shortUrl] = longUrl;
+  const userId = req.session["user_id"];
+  addNewUrl(shortUrl, longUrl, userId); // function below
+  res.redirect("/urls");
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const emailPasswordEmpty = !password || !email;
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
   if (emailPasswordEmpty) {
     res.status(400).send("please fill out the required field");
@@ -91,8 +113,8 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies.userid; //retriving userId from the cookies
-  let templateVars = { urls: urlDatabase, loggedUser: usersDb[userId] }; // provide the whole user obj to "loggedUser"
+  const userId = req.cookies.user_id;
+  let templateVars = { urls: urlDatabase, loggedUser: usersDb[userId] };
   res.render("urls_index", templateVars);
   //might be here where you add what dom did at w2d3 (10:40am - video)
 });
@@ -103,13 +125,12 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  //bring me to below page.
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user };
+  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id }; /// test what req.body.user ..vs.. req.cookies.userid
   res.render("url_login", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user };
+  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id };
   res.render("register", templateVars);
 });
 
@@ -126,7 +147,6 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   const longURL = urlDatabase[shortUrl];
-
   res.redirect(longURL);
 });
 
@@ -135,6 +155,21 @@ app.listen(PORT, () => {
 });
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
+});
+
+//-------?
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+app.post("/urls/:id/update", (req, res) => {
+  const shortUrl = req.params.id;
+  const longUrl = req.body.longURL;
+  if (req.session["user_id"] === urlDatabase[shortUrl].userId) {
+    urlDatabase[shortUrl].longUrl = longUrl;
+  }
+  res.redirect("/urls");
 });
 
 function generateRandomString() {
@@ -168,6 +203,14 @@ const getUserIdByEmail = email => {
   }
   return false;
 };
+
+function addNewUrl(shortUrl, longUrl, userId) {
+  urlDatabase[shortUrl] = {
+    shortUrl: shortUrl,
+    longUrl: longUrl,
+    userId: userId
+  };
+}
 
 /*
 NOTES:
