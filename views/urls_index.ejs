@@ -8,7 +8,7 @@
         <% for (let url in urls) { %>
         <li style="display:flex; align-items: center">
         
-            <%= url %> &rarr; <a href= <%= urls[url].longUrl %>><%= urls[url].longUrl %> </a>  <!--ask riki about h ref-->
+            <%= url %> &rarr; <a href= <%= urls[url].longUrl %>><%= urls[url].longUrl %> </a> 
             
             <form method="GET" action="/urls/<%= url %>">
                 <button style="margin:5px" type="submit" class="btn btn-primary">Edit</button>
@@ -18,7 +18,7 @@
                 <button style="margin:5px" type="submit" class="btn btn-primary">Delete</button>
             </form>
         </li>
-        <%} %>
+        <% } %>
     </ul>
 <% } %>
           
