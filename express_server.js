@@ -19,10 +19,15 @@ var urlDatabase = {
     longUrl: "http://www.lighthouselabs.ca",
     userId: "user3RandomID"
   },
+  u2kd8c: {
+    shortUrl: "u2kd8c",
+    longUrl: "http://www.msn.com",
+    userId: "user3RandomID"
+  },
   "9sm5xK": {
     shortUrl: "9sm5xK",
     longUrl: "http://www.google.com",
-    userId: "user3RandomID"
+    userId: "userRandomID" //urldb[shorturl].userId
   }
 };
 
@@ -45,6 +50,57 @@ const usersDb = {
     password: "test"
   }
 };
+
+function generateRandomString() {
+  return Math.random()
+    .toString(36)
+    .substring(2, 8);
+}
+
+const createUser = (email, password) => {
+  // this is being used in "app.post('register', (req,res).."
+  // if you need to understand this refer to notes below
+
+  const user_id = uuidv4();
+
+  const newUser = {
+    id: user_id,
+    email: email,
+    password: password
+  };
+
+  usersDb[user_id] = newUser;
+  return user_id;
+};
+
+const getUserIdByEmail = email => {
+  //email(parameter) is coming from req.body.email
+  for (const userId in usersDb) {
+    if (usersDb[userId].email === email) {
+      return userId; //same as saying true
+    }
+  }
+  return false;
+};
+
+function addNewUrl(shortUrl, longUrl, userId) {
+  urlDatabase[shortUrl] = {
+    shortUrl: shortUrl,
+    longUrl: longUrl,
+    userId: userId
+  };
+}
+function urlsForUser(userId) {
+  var filteredUrls = {};
+
+  for (var urlKey in urlDatabase) {
+    if (userId === urlDatabase[urlKey].userId) {
+      filteredUrls[urlKey] = urlDatabase[urlKey];
+    }
+  }
+
+  return filteredUrls;
+}
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -102,42 +158,37 @@ app.post("/register", (req, res) => {
   }
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
-});
-
-app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  res.redirect("/urls");
-});
+// path.split('/') -> // ["urls", "abc", "delete"]
+// req.params = {
+//     id: "abc"
+// }
 
 app.get("/urls", (req, res) => {
   const userId = req.cookies.user_id;
-  let templateVars = { urls: urlDatabase, loggedUser: usersDb[userId] };
+  let templateVars = { urls: urlsForUser(userId), loggedUser: usersDb[userId] };
   res.render("urls_index", templateVars);
   //might be here where you add what dom did at w2d3 (10:40am - video)
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id };
+  let templateVars = { loggedUser: req.cookies.user_id };
   res.render("urls_new", templateVars);
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id }; /// test what req.body.user ..vs.. req.cookies.userid
+  let templateVars = { loggedUser: req.cookies.user_id }; /// test what req.body.user ..vs.. req.cookies.userid
   res.render("url_login", templateVars);
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { urls: urlDatabase, loggedUser: req.cookies.user_id };
+  let templateVars = { loggedUser: req.cookies.user_id };
   res.render("register", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longUrl,
     loggedUser: req.cookies.user
   };
 
@@ -150,17 +201,17 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//-------?
+app.get("/users.json", (req, res) => {
+  res.json(usersDb);
+});
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+app.post("/urls/:shortURL", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/update", (req, res) => {
@@ -172,45 +223,14 @@ app.post("/urls/:id/update", (req, res) => {
   res.redirect("/urls");
 });
 
-function generateRandomString() {
-  return Math.random()
-    .toString(36)
-    .substring(2, 8);
-}
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
 
-const createUser = (email, password) => {
-  // this is being used in "app.post('register', (req,res).."
-  // if you need to understand this refer to notes below
-
-  const user_id = uuidv4();
-
-  const newUser = {
-    id: user_id,
-    email: email,
-    password: password
-  };
-
-  usersDb[user_id] = newUser;
-  return user_id;
-};
-
-const getUserIdByEmail = email => {
-  //email(parameter) is coming from req.body.email
-  for (const userId in usersDb) {
-    if (usersDb[userId].email === email) {
-      return userId; //same as saying true
-    }
-  }
-  return false;
-};
-
-function addNewUrl(shortUrl, longUrl, userId) {
-  urlDatabase[shortUrl] = {
-    shortUrl: shortUrl,
-    longUrl: longUrl,
-    userId: userId
-  };
-}
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 /*
 NOTES:

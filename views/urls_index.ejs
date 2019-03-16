@@ -1,23 +1,26 @@
  <!-- Add EJS code here -->
 <%- include ./partials/_header.ejs %>
-
-<br>
-<a href="/urls/new">Create new URLs</a>
-<h5>My URLs: </h5>
-<ul>
-      <% for (let url in urls) { %>
-      <li style="display:flex; align-items: center" >
-      
-      <%= url %> &rarr; <a href= <%= urls[url] %>><%= urls[url] %> </a>  <!--ask riki about h ref-->
-      <form method="GET" action="/urls/<%= url %>">
-      <button style="margin:5px" type="submit" class="btn btn-primary">Edit</button></form>
-      <form method="POST" action="/urls/<%= url %>/delete"> 
-      <button style="margin:5px" type="submit" class="btn btn-primary">Delete</button></form>
-      
-      
-      </li>
-          <%} %>
-</ul>
+<% if ( !loggedUser)  {%> 
+    <p> Please login or register to see your Urls</p>
+<% } else { %>
+    <h5>My URLs: </h5>
+    <ul>
+        <% for (let url in urls) { %>
+        <li style="display:flex; align-items: center">
+        
+            <%= url %> &rarr; <a href= <%= urls[url].longUrl %>><%= urls[url].longUrl %> </a>  <!--ask riki about h ref-->
+            
+            <form method="GET" action="/urls/<%= url %>">
+                <button style="margin:5px" type="submit" class="btn btn-primary">Edit</button>
+            </form>
+            
+            <form method="POST" action="/urls/<%= url %>/delete"> 
+                <button style="margin:5px" type="submit" class="btn btn-primary">Delete</button>
+            </form>
+        </li>
+        <%} %>
+    </ul>
+<% } %>
           
 </body>
 </html>
