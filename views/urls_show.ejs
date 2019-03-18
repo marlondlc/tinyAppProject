@@ -1,8 +1,8 @@
 <%- include ./partials/_header.ejs %>
 
-<form class="form-inline" action="/urls/<%= shortUrl %>/update" method="POST">
+<form class="form-inline" action="/urls/ <%= shortUrl %> /update" method="POST">
     <li>Short URL : <%= shortUrl %></li>
-    
+
     <input class="form-control" type="text" name="longUrl" placeholder="<%= longUrl %>" value="<%= longUrl.longUrl %>"style="width: 300px; margin: 1em">
       <button type="submit" class="btn btn-primary">Update</button>
 </form>
