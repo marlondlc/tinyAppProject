@@ -89,6 +89,10 @@ function urlsForUser(userId) {
   return filteredUrls;
 }
 
+app.get("/", (req, res) => {
+  res.redirect("/urls");
+});
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
