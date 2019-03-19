@@ -25,4 +25,8 @@ Tiny App is the full stack web application built with node and express that allo
 - Install all dependencies (using the 'NPM install' command).
 - Run the development web server using  the ' node express_server.js' command.
 
+Ex. From Project root:
+$ npm install
+$node express_server.js
 
+Then visit localhost:8080/urls

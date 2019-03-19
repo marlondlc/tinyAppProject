@@ -176,7 +176,7 @@ app.get("/register", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     longUrl: urlDatabase[req.params.shortURL],
-    shortUrl: req.params.shortUrl,
+    shortUrl: req.params.shortURL,
     user: usersDb[req.session.user_id],
     loggedUser: usersDb[req.session.user_id]
   };
@@ -188,13 +188,13 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[shortUrl].longUrl);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+// app.get("/urls.json", (req, res) => {
+//   res.json(urlDatabase);
+// });
 
-app.get("/users.json", (req, res) => {
-  res.json(usersDb);
-});
+// app.get("/users.json", (req, res) => {
+//   res.json(usersDb);
+// });
 
 app.post("/urls/:shortUrl", (req, res) => {
   urlDatabase[req.params.shortUrl] = req.body.longURL;
@@ -208,7 +208,7 @@ app.post("/urls/:shortUrl", (req, res) => {
 
 app.post("/urls/:shortUrl/update", (req, res) => {
   const shortUrl = req.params.shortUrl;
-  const longUrl = req.body.longURL;
+  const longUrl = req.body.longUrl;
 
   if (req.session["user_id"] === urlDatabase[shortUrl].userId) {
     urlDatabase[shortUrl].longUrl = longUrl;
